@@ -32,6 +32,10 @@ export default class ChromaLeon extends Extension {
     super(metadata);
     this._settings = null;
     this._bgSettings = null;
+    this._lastLightUri = null;
+    this._lastDarkUri = null;
+    this._wallpaperDebounceId = null;
+    this._pendingWallpaperChange = null;
     this._interfaceSettings = null;
     this._configId = null;
     this._timeoutId = null;
@@ -185,21 +189,65 @@ export default class ChromaLeon extends Extension {
       this,
     );
 
-    const handleWallpaperChange = async () => {
-      let colorScheme = this._interfaceSettings.get_string("color-scheme");
-      let currentUri =
-        colorScheme === "prefer-dark"
-          ? this._bgSettings.get_string("picture-uri-dark")
-          : this._bgSettings.get_string("picture-uri");
+    const handleWallpaperChange = () => {
+      const lightUri = this._bgSettings.get_string("picture-uri");
+      const darkUri = this._bgSettings.get_string("picture-uri-dark");
 
-      if (this._lastWallpaperUri === currentUri) return;
-      this._lastWallpaperUri = currentUri;
+      const lightChanged = this._lastLightUri !== lightUri;
+      const darkChanged = this._lastDarkUri !== darkUri;
 
-      this._runOperation(async (cancellable) => {
-        this._settings.set_boolean("custom-color", false);
-        await this._autoApplyWallpaperColor(null, cancellable);
-      });
-      return GLib.SOURCE_REMOVE;
+      this._lastLightUri = lightUri;
+      this._lastDarkUri = darkUri;
+
+      // External apps (GNOME Settings, file managers, wallpaper tools)
+      // usually only update one of the two keys. Deduplicating on the
+      // effective key alone would swallow changes made to the other one.
+      if (!lightChanged && !darkChanged) return;
+
+      // Some apps set both keys back-to-back; debounce so the change is
+      // evaluated (and the right key chosen) only once.
+      this._pendingWallpaperChange = {
+        light: this._pendingWallpaperChange?.light || lightChanged,
+        dark: this._pendingWallpaperChange?.dark || darkChanged,
+      };
+
+      if (this._wallpaperDebounceId)
+        GLib.Source.remove(this._wallpaperDebounceId);
+
+      this._wallpaperDebounceId = GLib.timeout_add(
+        GLib.PRIORITY_DEFAULT,
+        100,
+        () => {
+          this._wallpaperDebounceId = null;
+          const { light: lightWasChanged, dark: darkWasChanged } =
+            this._pendingWallpaperChange ?? {};
+          this._pendingWallpaperChange = null;
+
+          if (!lightWasChanged && !darkWasChanged) return GLib.SOURCE_REMOVE;
+
+          const isDark =
+            this._interfaceSettings.get_string("color-scheme") ===
+            "prefer-dark";
+
+          // Colorize the wallpaper matching the current color scheme when
+          // it changed; otherwise follow the wallpaper that was just
+          // picked.
+          const uri =
+            isDark && darkWasChanged
+              ? this._bgSettings.get_string("picture-uri-dark")
+              : !isDark && lightWasChanged
+                ? this._bgSettings.get_string("picture-uri")
+                : isDark
+                  ? this._bgSettings.get_string("picture-uri")
+                  : this._bgSettings.get_string("picture-uri-dark");
+
+          this._runOperation(async (cancellable) => {
+            this._settings.set_boolean("custom-color", false);
+            await this._autoApplyWallpaperColor(null, cancellable, uri);
+          });
+          return GLib.SOURCE_REMOVE;
+        },
+      );
     };
 
     this._bgSettings.connectObject(
@@ -280,6 +328,13 @@ export default class ChromaLeon extends Extension {
     this._cancellable?.cancel();
     this._cancellable = null;
     this._opChain = Promise.resolve();
+
+    if (this._wallpaperDebounceId) {
+      GLib.Source.remove(this._wallpaperDebounceId);
+      this._wallpaperDebounceId = null;
+    }
+    this._pendingWallpaperChange = null;
+
     this._settings = null;
     this._bgSettings = null;
     this._interfaceSettings = null;
@@ -320,7 +375,7 @@ export default class ChromaLeon extends Extension {
     }
   }
 
-  async _autoApplyWallpaperColor(color, cancellable) {
+  async _autoApplyWallpaperColor(color, cancellable, uri) {
     throwIfCancelled(cancellable);
     if (this._settings.get_boolean("custom-color")) {
       await this._updateShellStyles(cancellable);
@@ -328,11 +383,13 @@ export default class ChromaLeon extends Extension {
       return;
     }
 
-    let colorScheme = this._interfaceSettings.get_string("color-scheme");
-    let uri =
-      colorScheme === "prefer-dark"
-        ? this._bgSettings.get_string("picture-uri-dark")
-        : this._bgSettings.get_string("picture-uri");
+    if (!uri) {
+      let colorScheme = this._interfaceSettings.get_string("color-scheme");
+      uri =
+        colorScheme === "prefer-dark"
+          ? this._bgSettings.get_string("picture-uri-dark")
+          : this._bgSettings.get_string("picture-uri");
+    }
 
     if (!color) color = await ColorUtils.calculateVibrantColor(uri);
     throwIfCancelled(cancellable);
