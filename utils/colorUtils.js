@@ -34,7 +34,14 @@ export function calculateVibrantColor(uri) {
     let file = Gio.File.new_for_uri(uri);
 
     file.read_async(GLib.PRIORITY_DEFAULT, null, (source_object, res) => {
-      let stream = source_object.read_finish(res);
+      let stream;
+      try {
+        stream = source_object.read_finish(res);
+      } catch (e) {
+        console.log(`[ChromaLeon] failed to read ${uri}: ${e.message}`);
+        resolve(null);
+        return;
+      }
 
       GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(
         stream,
@@ -43,12 +50,18 @@ export function calculateVibrantColor(uri) {
         true,
         null,
         (obj, asyncRes) => {
-          let pixbuf = GdkPixbuf.Pixbuf.new_from_stream_finish(asyncRes);
-
-          stream.close_async(GLib.PRIORITY_DEFAULT, null, () => {});
-
-          let color = _processPixbuf(pixbuf);
-          resolve(color);
+          try {
+            let pixbuf = GdkPixbuf.Pixbuf.new_from_stream_finish(asyncRes);
+            let color = _processPixbuf(pixbuf);
+            resolve(color);
+          } catch (e) {
+            console.log(
+              `[ChromaLeon] failed to decode ${uri}: ${e.message}`,
+            );
+            resolve(null);
+          } finally {
+            stream.close_async(GLib.PRIORITY_DEFAULT, null, () => {});
+          }
         },
       );
     });

@@ -165,6 +165,8 @@ class ChromaLeonUI {
     this._lastDarkUri = null;
     this._bgDebounceId = null;
     this._pendingBgChange = null;
+    this._wallpaperFileMonitor = null;
+    this._monitoredWallpaperUri = null;
 
     this._runOperation(async (cancellable) => {
       await this._renderColorUI(null, cancellable);
@@ -954,7 +956,12 @@ class ChromaLeonUI {
     // refresh the displayed color.
     this._accentColorId = this._settings.connect(
       "changed::accent-color",
-      () => this._applyTheme(),
+      () => {
+        console.log(
+          `[ChromaLeon-prefs] accent-color changed -> ${this._settings.get_string("accent-color")}`,
+        );
+        this._applyTheme();
+      },
     );
 
     this._loadWallpapersAsync();
@@ -969,10 +976,12 @@ class ChromaLeonUI {
         this._runOperation(async (cancellable) => {
           await this._updateWallpaperUI(cancellable);
         });
+        this._setupWallpaperFileMonitor();
       },
     );
 
     const handleBgChange = () => {
+      console.log("[ChromaLeon-prefs] background change signal received");
       const lightUri = this._bgSettings.get_string("picture-uri");
       const darkUri = this._bgSettings.get_string("picture-uri-dark");
 
@@ -1023,6 +1032,7 @@ class ChromaLeonUI {
           this._runOperation(async (cancellable) => {
             await this._updateWallpaperUI(cancellable, uri);
           });
+          this._setupWallpaperFileMonitor();
           return GLib.SOURCE_REMOVE;
         },
       );
@@ -1038,6 +1048,8 @@ class ChromaLeonUI {
       handleBgChange,
     );
 
+    this._setupWallpaperFileMonitor();
+
     window.connect("close-request", () => {
       if (this._settingsId) this._settings.disconnect(this._settingsId);
       if (this._bgChangedId1) this._bgSettings.disconnect(this._bgChangedId1);
@@ -1050,6 +1062,12 @@ class ChromaLeonUI {
         this._bgDebounceId = null;
       }
       this._pendingBgChange = null;
+
+      if (this._wallpaperFileMonitor) {
+        this._wallpaperFileMonitor.disconnect();
+        this._wallpaperFileMonitor = null;
+      }
+      this._monitoredWallpaperUri = null;
 
       this._cancellable?.cancel();
       this._cancellable = null;
@@ -1517,6 +1535,46 @@ class ChromaLeonUI {
           }
         },
       );
+    }
+  }
+
+  // Some wallpaper tools (e.g. Damask) replace the wallpaper file contents
+  // without changing the picture-uri settings; watch the file so the
+  // preview stays in sync.
+  _setupWallpaperFileMonitor() {
+    if (this._wallpaperFileMonitor) {
+      this._wallpaperFileMonitor.disconnect();
+      this._wallpaperFileMonitor = null;
+    }
+
+    if (!this._bgSettings || !this._interfaceSettings) return;
+
+    const isDark =
+      this._interfaceSettings.get_string("color-scheme") === "prefer-dark";
+    const uri = this._bgSettings.get_string(
+      isDark ? "picture-uri-dark" : "picture-uri",
+    );
+
+    if (!uri || !uri.startsWith("file://")) return;
+    if (this._monitoredWallpaperUri === uri) return;
+
+    const file = Gio.File.new_for_uri(uri);
+    if (!file.query_exists(null)) return;
+
+    try {
+      this._wallpaperFileMonitor = file.monitor(
+        Gio.FileMonitorFlags.NONE,
+        null,
+      );
+      this._wallpaperFileMonitor.connect("changed", () => {
+        console.log(`[ChromaLeon-prefs] wallpaper file modified: ${uri}`);
+        this._runOperation(async (cancellable) => {
+          await this._updateWallpaperUI(cancellable, uri);
+        });
+      });
+      this._monitoredWallpaperUri = uri;
+    } catch (e) {
+      console.log(`[ChromaLeon-prefs] failed to monitor ${uri}: ${e.message}`);
     }
   }
 
