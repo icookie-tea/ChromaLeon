@@ -161,6 +161,10 @@ class ChromaLeonUI {
 
     this._cancellable = null;
     this._opChain = Promise.resolve();
+    this._lastLightUri = null;
+    this._lastDarkUri = null;
+    this._bgDebounceId = null;
+    this._pendingBgChange = null;
 
     this._runOperation(async (cancellable) => {
       await this._renderColorUI(null, cancellable);
@@ -945,6 +949,14 @@ class ChromaLeonUI {
 
     this._applyTheme();
 
+    // The main extension updates accent-color when the wallpaper changes;
+    // the prefs UI runs in a separate process and must listen for it to
+    // refresh the displayed color.
+    this._accentColorId = this._settings.connect(
+      "changed::accent-color",
+      () => this._applyTheme(),
+    );
+
     this._loadWallpapersAsync();
 
     this._runOperation(async (cancellable) => {
@@ -961,9 +973,59 @@ class ChromaLeonUI {
     );
 
     const handleBgChange = () => {
-      this._runOperation(async (cancellable) => {
-        await this._updateWallpaperUI(cancellable);
-      });
+      const lightUri = this._bgSettings.get_string("picture-uri");
+      const darkUri = this._bgSettings.get_string("picture-uri-dark");
+
+      const lightChanged = this._lastLightUri !== lightUri;
+      const darkChanged = this._lastDarkUri !== darkUri;
+
+      this._lastLightUri = lightUri;
+      this._lastDarkUri = darkUri;
+
+      // External apps (file managers, wallpaper tools) usually only update
+      // one of the two keys; some set both back-to-back. Debounce so the
+      // preview is refreshed once, from the right key.
+      if (!lightChanged && !darkChanged) return;
+
+      this._pendingBgChange = {
+        light: this._pendingBgChange?.light || lightChanged,
+        dark: this._pendingBgChange?.dark || darkChanged,
+      };
+
+      if (this._bgDebounceId) GLib.Source.remove(this._bgDebounceId);
+      this._bgDebounceId = GLib.timeout_add(
+        GLib.PRIORITY_DEFAULT,
+        100,
+        () => {
+          this._bgDebounceId = null;
+          const { light: lightWasChanged, dark: darkWasChanged } =
+            this._pendingBgChange ?? {};
+          this._pendingBgChange = null;
+
+          if (!lightWasChanged && !darkWasChanged)
+            return GLib.SOURCE_REMOVE;
+
+          const isDark =
+            this._interfaceSettings.get_string("color-scheme") ===
+            "prefer-dark";
+
+          // Preview the wallpaper matching the current color scheme when it
+          // changed; otherwise follow the wallpaper that was just picked.
+          const uri =
+            isDark && darkWasChanged
+              ? this._bgSettings.get_string("picture-uri-dark")
+              : !isDark && lightWasChanged
+                ? this._bgSettings.get_string("picture-uri")
+                : isDark
+                  ? this._bgSettings.get_string("picture-uri")
+                  : this._bgSettings.get_string("picture-uri-dark");
+
+          this._runOperation(async (cancellable) => {
+            await this._updateWallpaperUI(cancellable, uri);
+          });
+          return GLib.SOURCE_REMOVE;
+        },
+      );
     };
 
     this._bgChangedId1 = this._bgSettings.connect(
@@ -982,6 +1044,12 @@ class ChromaLeonUI {
       if (this._bgChangedId2) this._bgSettings.disconnect(this._bgChangedId2);
       if (this._colorSchemeId)
         this._interfaceSettings.disconnect(this._colorSchemeId);
+      if (this._accentColorId) this._settings.disconnect(this._accentColorId);
+      if (this._bgDebounceId) {
+        GLib.Source.remove(this._bgDebounceId);
+        this._bgDebounceId = null;
+      }
+      this._pendingBgChange = null;
 
       this._cancellable?.cancel();
       this._cancellable = null;
@@ -1452,15 +1520,17 @@ class ChromaLeonUI {
     }
   }
 
-  async _updateWallpaperUI(cancellable = null) {
+  async _updateWallpaperUI(cancellable = null, uri = null) {
     if (!this._previewContainer) return;
     throwIfCancelled(cancellable);
 
-    let colorScheme = this._interfaceSettings.get_string("color-scheme");
-    let uri =
-      colorScheme === "prefer-dark"
-        ? this._bgSettings.get_string("picture-uri-dark")
-        : this._bgSettings.get_string("picture-uri");
+    if (!uri) {
+      let colorScheme = this._interfaceSettings.get_string("color-scheme");
+      uri =
+        colorScheme === "prefer-dark"
+          ? this._bgSettings.get_string("picture-uri-dark")
+          : this._bgSettings.get_string("picture-uri");
+    }
 
     if (uri && !uri.startsWith("file://") && uri.startsWith("/")) {
       uri = Gio.File.new_for_path(uri).get_uri();
