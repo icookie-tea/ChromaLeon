@@ -102,7 +102,21 @@ GNOME Shell 自己监听壁纸文件变化，所以屏幕壁纸会变；但扩�
   resolve(null)
 - 全链路加入 `[ChromaLeon]` / `[ChromaLeon-prefs]` 调试日志
 
-### 3.4 Fork 标识（commit `d327fad`）
+### 3.4 文件监控在色模式切换后丢失（commit `7a593e3`）
+
+现象：强调色自动更新"只在扩展设置打开时生效"。
+
+根因：`_setupWallpaperFileMonitor()` **先断开旧监控**，再判断"URI 未变则
+返回"——切换深浅色模式会触发重挂，URI 未变时直接返回，导致监控被断开
+后再也没挂回来。此后只有设置页进程（新进程、新监控）在响应，且它是靠
+`_renderColorUI` 自动应用首个调色板颜色的逻辑写入的——所以看起来像
+"设置页打开才生效"（实际是相关而非因果）。
+
+修复：先判断 URI，监控存活且 URI 未变则直接返回；只有 URI 变化才断开
+重挂。扩展与设置页两处同样缺陷均已修复，并抽出
+`_teardownWallpaperFileMonitor()` 统一清理。
+
+### 3.5 Fork 标识（commit `d327fad`）
 
 `metadata.json`：
 
@@ -116,6 +130,8 @@ GNOME Shell 自己监听壁纸文件变化，所以屏幕壁纸会变；但扩�
 ## 4. 分支与提交
 
 ```
+7a593e3 fix: file monitor lost after color-scheme toggle
+4fddeba docs: add wallpaper accent update troubleshooting and fix writeup
 e4f754c fix: detect wallpaper changes made by replacing the wallpaper file
 d327fad chore: rebrand fork with unique uuid to coexist with upstream
 7afea98 fix: live-update prefs page when wallpaper changes externally
@@ -151,6 +167,7 @@ gnome-extensions install --force /tmp/user-accent-colors@icookie.shell-extension
 | 设置页打开时外部换壁纸 | 预览与强调色实时更新 |
 | 切换深浅色模式 | 行为不变，按新生效键取色 |
 | 快速连续切换多张壁纸 | 去抖后只处理一次，跟随最后一张 |
+| 切换色模式后再换壁纸（设置页关闭） | 强调色仍实时更新（回归 3.4） |
 
 ## 6. 已知限制
 
