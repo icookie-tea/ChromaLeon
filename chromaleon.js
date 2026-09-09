@@ -1063,11 +1063,7 @@ class ChromaLeonUI {
       }
       this._pendingBgChange = null;
 
-      if (this._wallpaperFileMonitor) {
-        this._wallpaperFileMonitor.disconnect();
-        this._wallpaperFileMonitor = null;
-      }
-      this._monitoredWallpaperUri = null;
+      this._teardownWallpaperFileMonitor();
 
       this._cancellable?.cancel();
       this._cancellable = null;
@@ -1542,11 +1538,6 @@ class ChromaLeonUI {
   // without changing the picture-uri settings; watch the file so the
   // preview stays in sync.
   _setupWallpaperFileMonitor() {
-    if (this._wallpaperFileMonitor) {
-      this._wallpaperFileMonitor.disconnect();
-      this._wallpaperFileMonitor = null;
-    }
-
     if (!this._bgSettings || !this._interfaceSettings) return;
 
     const isDark =
@@ -1555,8 +1546,17 @@ class ChromaLeonUI {
       isDark ? "picture-uri-dark" : "picture-uri",
     );
 
-    if (!uri || !uri.startsWith("file://")) return;
-    if (this._monitoredWallpaperUri === uri) return;
+    if (!uri || !uri.startsWith("file://")) {
+      this._teardownWallpaperFileMonitor();
+      return;
+    }
+
+    // No-op when the monitor for this URI is already active; disconnecting
+    // first (and then returning here) would leave us without a monitor.
+    if (this._wallpaperFileMonitor && this._monitoredWallpaperUri === uri)
+      return;
+
+    this._teardownWallpaperFileMonitor();
 
     const file = Gio.File.new_for_uri(uri);
     if (!file.query_exists(null)) return;
@@ -1576,6 +1576,14 @@ class ChromaLeonUI {
     } catch (e) {
       console.log(`[ChromaLeon-prefs] failed to monitor ${uri}: ${e.message}`);
     }
+  }
+
+  _teardownWallpaperFileMonitor() {
+    if (this._wallpaperFileMonitor) {
+      this._wallpaperFileMonitor.disconnect();
+      this._wallpaperFileMonitor = null;
+    }
+    this._monitoredWallpaperUri = null;
   }
 
   async _updateWallpaperUI(cancellable = null, uri = null) {

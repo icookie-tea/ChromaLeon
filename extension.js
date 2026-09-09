@@ -352,11 +352,7 @@ export default class ChromaLeon extends Extension {
     }
     this._pendingWallpaperChange = null;
 
-    if (this._wallpaperFileMonitor) {
-      this._wallpaperFileMonitor.disconnect();
-      this._wallpaperFileMonitor = null;
-    }
-    this._monitoredWallpaperUri = null;
+    this._teardownWallpaperFileMonitor();
 
     this._settings = null;
     this._bgSettings = null;
@@ -595,11 +591,6 @@ export default class ChromaLeon extends Extension {
   // reloads the wallpaper on file changes, but our extension only listens
   // to dconf — so also watch the wallpaper file itself.
   _setupWallpaperFileMonitor() {
-    if (this._wallpaperFileMonitor) {
-      this._wallpaperFileMonitor.disconnect();
-      this._wallpaperFileMonitor = null;
-    }
-
     if (!this._bgSettings || !this._interfaceSettings) return;
 
     const isDark =
@@ -608,8 +599,17 @@ export default class ChromaLeon extends Extension {
       isDark ? "picture-uri-dark" : "picture-uri",
     );
 
-    if (!uri || !uri.startsWith("file://")) return;
-    if (this._monitoredWallpaperUri === uri) return;
+    if (!uri || !uri.startsWith("file://")) {
+      this._teardownWallpaperFileMonitor();
+      return;
+    }
+
+    // No-op when the monitor for this URI is already active; disconnecting
+    // first (and then returning here) would leave us without a monitor.
+    if (this._wallpaperFileMonitor && this._monitoredWallpaperUri === uri)
+      return;
+
+    this._teardownWallpaperFileMonitor();
 
     const file = Gio.File.new_for_uri(uri);
     if (!file.query_exists(null)) return;
@@ -631,6 +631,14 @@ export default class ChromaLeon extends Extension {
     } catch (e) {
       console.log(`[ChromaLeon] failed to monitor ${uri}: ${e.message}`);
     }
+  }
+
+  _teardownWallpaperFileMonitor() {
+    if (this._wallpaperFileMonitor) {
+      this._wallpaperFileMonitor.disconnect();
+      this._wallpaperFileMonitor = null;
+    }
+    this._monitoredWallpaperUri = null;
   }
 
   async _reloadGtkStylesheet(cancellable = null) {
