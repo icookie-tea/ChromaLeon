@@ -31,6 +31,8 @@ import {
 } from "resource:///org/gnome/shell/ui/main.js";
 
 const GTK_VERSIONS = ["gtk-3.0", "gtk-4.0"];
+const TOP_BAR_START = "/* Top Bar */";
+const TOP_BAR_END = "/* Activities Ripple */";
 const REGEX_MARKER =
   /\/\* CustomAccentExtension Start \*\/[\s\S]*?\/\* CustomAccentExtension End \*\/\n?/g;
 const START_MARKER = "/* CustomAccentExtension Start */";
@@ -98,6 +100,38 @@ export function removeShellStylesheet(cssFile) {
     theme.unload_stylesheet(cssFile);
   }
   return null;
+}
+
+// GNOME's own light theme ships a light top bar (#fafafb), so swapping in the
+// light stylesheet would repaint the panel light. Keep the dark theme's top bar
+// block in the light stylesheet so enabling "Prefer Light Style" leaves the
+// panel alone. The block is delimited by comments present in every shell
+// template; if a template ever drops them we return the text untouched rather
+// than mangling it.
+function replaceTopBarBlock(css, topBarCss) {
+  const start = css.indexOf(TOP_BAR_START);
+  if (start === -1) return css;
+
+  const end = css.indexOf(TOP_BAR_END, start);
+  if (end === -1) return css;
+
+  return css.slice(0, start) + topBarCss + css.slice(end);
+}
+
+// The dark block is lifted verbatim from the dark template, so it carries the
+// dark template's own @@PANEL@@ placeholder too.
+function stripPanelPlaceholder(css) {
+  return css.replace(/@@PANEL@@\n?/g, "");
+}
+
+function extractTopBarBlock(css) {
+  const start = css.indexOf(TOP_BAR_START);
+  if (start === -1) return null;
+
+  const end = css.indexOf(TOP_BAR_END, start);
+  if (end === -1) return null;
+
+  return css.slice(start, end);
 }
 
 Gio._promisify(Gio.File.prototype, "replace_async", "replace_finish");
@@ -286,10 +320,26 @@ export async function updateShellStylesheet(
       let textDark = new TextDecoder().decode(contentsDark);
       let textCustom = new TextDecoder().decode(contentsCustom);
 
+      // "Prefer Light Style" should not repaint the top bar. GNOME's light
+      // theme defines a light panel, so swap the dark theme's top bar block
+      // into the light stylesheet.
+      //
+      // tint-panel is a dark-mode-only option, so the panel tint is stripped
+      // from the light stylesheet instead of substituted. Stripping happens
+      // after the swap so it also covers the placeholder inside the inserted
+      // dark block; it must cover the templates' trailing @@PANEL@@ too,
+      // since that one expands to a late #panel rule which would override the
+      // dark top bar we just installed.
+      const darkTopBar = extractTopBarBlock(textDark);
+      if (darkTopBar) {
+        textLight = replaceTopBarBlock(textLight, darkTopBar);
+      }
+
+      textLight = stripPanelPlaceholder(textLight);
+
       let cssLight = textLight
         .replace(/@@ACCENT@@/g, accentValue)
         .replace(/-st-accent-color/g, accentValue)
-        .replace(/@@PANEL@@/g, cssPanel)
         .replace(
           /@@TINT_STRENGTH@@/g,
           `${getConvertedStrength(tintStrength, false, 12)}%`,

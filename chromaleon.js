@@ -502,7 +502,9 @@ class ChromaLeonUI {
 
     const preferLightRow = new Adw.ExpanderRow({
       title: _("Prefer Light Style"),
-      subtitle: _("Use a light style for the Shell in the light theme."),
+      subtitle: _(
+        "Use a light style for the Shell in the light theme. The top bar keeps its dark appearance.",
+      ),
       show_enable_switch: true,
     });
     colorsGroup.add(preferLightRow);
@@ -559,7 +561,9 @@ class ChromaLeonUI {
 
     const TintPanel = new Adw.SwitchRow({
       title: _("Tint Dark Panel"),
-      subtitle: _("Also tint the panel when in dark mode."),
+      subtitle: _(
+        "Also tint the panel when in dark mode. The light style never tints it.",
+      ),
     });
 
     TintShellRow.add_row(TintPanel);
