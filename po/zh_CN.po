@@ -1,0 +1,403 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-07 17:22+0800\n"
+"PO-Revision-Date: 2026-08-24 11:51+0000\n"
+"Last-Translator: lein <cayin0219@outlook.com>\n"
+"Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
+"projects/chromaleon/extension/zh_Hans/>\n"
+"Language: zh_Hans\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2026.9.dev0\n"
+
+#: chromaleon.js:133
+msgid "Error getting thumbnail: "
+msgstr "获取缩略图失败： "
+
+#: chromaleon.js:142
+msgid "Wallpaper"
+msgstr "背景"
+
+#: chromaleon.js:147
+msgid "Preferences"
+msgstr "首选项"
+
+#: chromaleon.js:211 chromaleon.js:244
+msgid "Accent Color"
+msgstr "强调色"
+
+#: chromaleon.js:221
+msgid "Main color"
+msgstr "主色"
+
+#: chromaleon.js:244
+msgid "Wallpaper Colors"
+msgstr "背景颜色"
+
+#: chromaleon.js:250
+msgid ""
+"The system automatically updates the accent color based on your wallpaper."
+msgstr "系统将依据背景自动更新强调色。"
+
+#: chromaleon.js:308
+msgid "Additional colors"
+msgstr "更多颜色"
+
+#: chromaleon.js:345
+msgid "Add wallpapers"
+msgstr "添加背景"
+
+#: chromaleon.js:359
+msgid "Wallpapers"
+msgstr "背景列表"
+
+#: chromaleon.js:430
+msgid "ChromaLeon only exists thanks to users like you!"
+msgstr "ChromaLeon 项目的存续离不开像您一样的用户！"
+
+#: chromaleon.js:432
+msgid ""
+"If ChromaLeon has earned a place in your device's customization, consider "
+"helping the project move forward by making a small donation."
+msgstr ""
+"如果你很喜欢用 ChromaLeon 做设备个性化，欢迎小额捐赠以支持项目继续开发。"
+
+#: chromaleon.js:493
+msgid "Colors"
+msgstr "颜色"
+
+#: chromaleon.js:498
+msgid "GNOME Colors"
+msgstr "GNOME 强调色"
+
+#: chromaleon.js:499
+msgid "Use native GNOME colors instead of wallpaper colors."
+msgstr "使用 GNOME 原生强调色，而非背景提取颜色。"
+
+#: chromaleon.js:504
+msgid "Prefer Light Style"
+msgstr "偏好亮色样式"
+
+#: chromaleon.js:506
+msgid ""
+"Use a light style for the Shell in the light theme. The top bar keeps its "
+"dark appearance."
+msgstr "亮色模式下，为 Shell 采用浅色样式，顶栏保持深色外观。"
+
+#: chromaleon.js:513
+msgid "Fully Light"
+msgstr "全亮色"
+
+#: chromaleon.js:515
+msgid ""
+"Use a fully light style instead of the default style for the GNOME Shell "
+"light theme."
+msgstr "浅色主题下，为 GNOME Shell 采用全亮色样式而非默认样式。"
+
+#: chromaleon.js:550
+msgid "Tint GNOME"
+msgstr "GNOME 界面着色"
+
+#: chromaleon.js:551
+msgid "Based on Tint my GNOME"
+msgstr "基于「Tint my GNOME」项目"
+
+#: chromaleon.js:556
+msgid "Tint Shell"
+msgstr "Shell 界面着色"
+
+#: chromaleon.js:557
+msgid "Tints the GNOME Shell with the color of your choice."
+msgstr "使用选定颜色为 GNOME Shell 界面叠加色调。"
+
+#: chromaleon.js:563
+msgid "Tint Dark Panel"
+msgstr "暗色面板着色"
+
+#: chromaleon.js:565
+#: chromaleon.js:579
+msgid "Also tint the panel when in dark mode. The light style never tints it."
+msgstr "暗色样式下对面板叠加色调，浅色样式下始终不对顶栏着色。"
+
+#: chromaleon.js:579
+msgid "Tint Apps"
+msgstr "应用着色"
+
+#: chromaleon.js:581
+msgid "Tints the LibAdwaita applications with the color of your choice."
+msgstr "使用选定颜色为 LibAdwaita 应用叠加色调。"
+
+#: chromaleon.js:588
+msgid ""
+"Also tint the GTK3 apps (the {0} extension and the {1} theme are required to "
+"avoid bugs)."
+msgstr ""
+"使用选定颜色为 GTK3 应用叠加色调（需安装 {0} 扩展与 {1} 主题以规避故障）。"
+
+#: chromaleon.js:601
+msgid "Tint GTK3 Apps"
+msgstr "GTK3 应用着色"
+
+#: chromaleon.js:615
+msgid "Subtle"
+msgstr "柔和"
+
+#: chromaleon.js:616
+msgid "Default"
+msgstr "默认"
+
+#: chromaleon.js:617
+msgid "Strong"
+msgstr "浓郁"
+
+#: chromaleon.js:618
+msgid "Stronger"
+msgstr "浓烈"
+
+#: chromaleon.js:622
+msgid "Tinting Strength"
+msgstr "着色强度"
+
+#: chromaleon.js:623
+msgid "Determines the strength of the tint effect."
+msgstr "调节着色效果强度。"
+
+#: chromaleon.js:636
+msgid "Darker Tint"
+msgstr "加深着色色调"
+
+#: chromaleon.js:637
+msgid "Applies a darker tint."
+msgstr "启用加深着色效果。"
+
+#: chromaleon.js:677
+msgid "Icon Theme"
+msgstr "图标主题"
+
+#: chromaleon.js:682
+msgid "Folder icon theme"
+msgstr "文件夹图标主题"
+
+#: chromaleon.js:683
+msgid "Applies the accent color to folder icons."
+msgstr "将强调色应用至文件夹图标。"
+
+#: chromaleon.js:689
+msgid "Application icon theme"
+msgstr "应用图标主题"
+
+#: chromaleon.js:690
+msgid "Applies the accent color to some app icons."
+msgstr "将强调色应用至部分应用图标。"
+
+#: chromaleon.js:694
+msgid "MoreWaita"
+msgstr "MoreWaita"
+
+#: chromaleon.js:695
+msgid "Applies integration with the MoreWaita icon pack."
+msgstr "启用与 MoreWaita 图标包的适配集成。"
+
+#: chromaleon.js:730
+msgid "Customization"
+msgstr "自定义"
+
+#: chromaleon.js:735
+msgid "Custom stylesheet"
+msgstr "自定义样式表"
+
+#: chromaleon.js:737
+msgid ""
+"A file that overrides the CSS of the shell and user extensions, with support "
+"for ChromaLeon accent colors."
+msgstr ""
+"该文件可覆盖 Shell 与用户扩展的样式（CSS），支持使用 ChromaLeon 强调色变量。"
+
+#: chromaleon.js:756 chromaleon.js:773 chromaleon.js:831
+msgid "About the custom stylesheet"
+msgstr "关于自定义样式表"
+
+#: chromaleon.js:762
+msgid "Open file"
+msgstr "打开文件"
+
+#: chromaleon.js:775
+msgid ""
+"This file is used to apply custom CSS to GNOME Shell.\n"
+"\n"
+"The extension processes all content within this file, replacing the "
+"<b><tt>@@ACCENT@@</tt></b> and <b><tt>-st-accent-color</tt></b> variables "
+"with the color selected in the ChromaLeon settings before applying them to "
+"the system. This can be useful if an extension does not have the accent "
+"colors applied correctly.\n"
+"\n"
+"<b>Tip:</b> If your changes do not take effect, try adding <b><tt>!"
+"important</tt></b> to your CSS rules."
+msgstr ""
+"该文件用于向 GNOME Shell 加载自定义 CSS。\n"
+"\n"
+"扩展会预处理文件内全部内容：在样式应用至系统前，将变量 <b><tt>@@ACCENT@@</"
+"tt></b> 与 <b><tt>-st-accent-color</tt></b> 替换为你在 ChromaLeon 设置中选定"
+"的强调色。该功能可修复部分扩展强调色渲染异常的问题。\n"
+"\n"
+"<b>提示：</b> 若修改未生效，可尝试在 CSS 规则中添加 <b><tt>!important</tt></"
+"b>。"
+
+#: chromaleon.js:782 chromaleon.js:850
+msgid "Close"
+msgstr "关闭"
+
+#: chromaleon.js:804
+msgid "Failed to open custom.css: "
+msgstr "无法打开 custom.css 文件： "
+
+#: chromaleon.js:811
+msgid "Miscellaneous"
+msgstr "杂项"
+
+#: chromaleon.js:816
+msgid "Disabled"
+msgstr "禁用"
+
+#: chromaleon.js:817
+msgid "Default (recommended)"
+msgstr "默认（推荐）"
+
+#: chromaleon.js:818
+msgid "Smooth (experimental)"
+msgstr "平滑（实验性）"
+
+#: chromaleon.js:822
+msgid "Hot Reload"
+msgstr "热重载"
+
+#: chromaleon.js:823
+msgid "Enables theme hot reloading for GTK4 applications."
+msgstr "为 GTK4 应用启用主题热重载。"
+
+#: chromaleon.js:840
+msgid "About Hot Reload"
+msgstr "关于热重载"
+
+#: chromaleon.js:842
+msgid ""
+"Hot reload uses rapid switching between the high contrast theme and the "
+"default theme to force GTK4 applications to reload the stylesheet.\n"
+"\n"
+"<b>Default reload:</b> This is the recommended, native option. While it may "
+"cause flickering during the switch in some cases, it is the safest option "
+"and the one least prone to issues during the transition.\n"
+"\n"
+"<b>Smooth reload:</b> This option uses a subprocess to speed up execution, "
+"drastically reducing flickering when switching themes. However, it is the "
+"least reliable option, as it can lead to errors such as failed reloads or "
+"getting stuck on the high contrast theme (or vice versa, if you use GNOME "
+"with that style enabled).\n"
+"\n"
+"<b>Note:</b> This does not apply to native GNOME accent colors, as it is not "
+"necessary for them."
+msgstr ""
+"热重载通过在高对比度主题与默认主题之间快速切换，强制 GTK4 应用重新加载样式"
+"表。\n"
+"\n"
+"<b>默认重载：</b> 推荐使用的原生方案。部分场景切换时可能出现闪烁，但最为稳"
+"定，切换过程不易产生异常。\n"
+"\n"
+"<b>平滑重载：</b> 该模式借助子进程提升执行效率，大幅减轻主题切换时的闪烁现"
+"象。可靠性欠佳，可能出现重载失败、界面卡在高对比度主题等问题（若 GNOME 已启用"
+"高对比度样式，则可能反向卡住）。\n"
+"\n"
+"<b>注意：</b> 该功能不适用于 GNOME 原生强调色，原生强调色无需此机制。"
+
+#: chromaleon.js:865
+msgid "Apply to Flatpaks"
+msgstr "应用至 Flatpak 应用"
+
+#: chromaleon.js:867
+msgid "Allow Flatpaks to access your custom accent color variables."
+msgstr "允许 Flatpak 应用访问自定义强调色变量。"
+
+#: chromaleon.js:873
+msgid "Enable shortcut"
+msgstr "启用快捷入口"
+
+#: chromaleon.js:875
+msgid "Create a shortcut in the app grid by adding a .desktop file."
+msgstr "通过创建 .desktop 文件，在应用网格生成快捷入口。"
+
+#: chromaleon.js:1142
+msgid "Wallpaper deleted successfully!"
+msgstr "背景移除成功！"
+
+#: chromaleon.js:1146
+msgid "Error deleting wallpaper: "
+msgstr "移除背景失败： "
+
+#: chromaleon.js:1152
+msgid "Select a Wallpaper"
+msgstr "选择背景"
+
+#: chromaleon.js:1154
+msgid "_Open"
+msgstr "打开"
+
+#: chromaleon.js:1155
+msgid "_Cancel"
+msgstr "取消"
+
+#: chromaleon.js:1160
+msgid "All Images"
+msgstr "所有图像"
+
+#: chromaleon.js:1187
+msgid "Wallpaper already exists!"
+msgstr "背景已存在！"
+
+#: chromaleon.js:1203
+msgid "Wallpaper added successfully!"
+msgstr "背景添加成功！"
+
+#: chromaleon.js:1207
+msgid "Error copying wallpaper: "
+msgstr "复制背景失败： "
+
+#: chromaleon.js:1703
+msgid "Unable to load colors."
+msgstr "加载颜色失败。"
+
+#~ msgid "Thank you for supporting the work behind ChromaLeon!"
+#~ msgstr "感谢你支持 ChromaLeon 的开发工作！"
+
+#~ msgid "Support"
+#~ msgstr "支持"
+
+#~ msgid "Support the project"
+#~ msgstr "支持本项目"
+
+#~ msgid "Why support ChromaLeon?"
+#~ msgstr "为什么支持 ChromaLeon？"
+
+#~ msgid ""
+#~ "Developing free software requires time, energy, and dedication. Your "
+#~ "donation directly supports the project and helps keep it alive!"
+#~ msgstr ""
+#~ "开发自由软件需要投入大量时间、精力与热忱。您的捐赠将直接支持本项目，助力项"
+#~ "目持续维护更新！"
+
+#~ msgid "Cancel"
+#~ msgstr "取消"
+
+#~ msgid ""
+#~ "Keeping this disabled resolves issues with panel modifications in "
+#~ "extensions such as \"Blur My Shell\" and \"PaperWM\"."
+#~ msgstr ""
+#~ "关闭此项可解决“Blur My Shell”、“PaperWM”等扩展修改面板引发的各类问题。"

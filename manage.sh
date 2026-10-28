@@ -89,13 +89,25 @@ if [ "$OPT_MO" = true ]; then
         mkdir -p "locale/$lang_code/LC_MESSAGES"
         msgfmt "$lang" -o "locale/$lang_code/LC_MESSAGES/chromaleon.mo"
     done
+
+    # gettext only looks up the language names reported by
+    # GLib.get_language_names() (zh_CN for a zh_CN.UTF-8 session), never the
+    # script-style zh_Hans. Keep a zh_CN catalogue next to zh_Hans so the
+    # translations resolve for a plain-directory install too.
+    if [ -d "locale/zh_Hans" ] && [ ! -d "locale/zh_CN" ]; then
+        echo -e "${BLUE}Mirroring zh_Hans -> zh_CN...${NC}"
+        cp -r ./locale/zh_Hans ./locale/zh_CN
+    fi
+
+    # gnome-extensions pack derives the locale list from po/*.po and silently
+    # skips any locale/ dir with no matching .po, so the mirror needs a .po too.
+    if [ -f "po/zh_Hans.po" ] && [ ! -f "po/zh_CN.po" ]; then
+        cp ./po/zh_Hans.po ./po/zh_CN.po
+    fi
 fi
 
 if [ "$OPT_ZIP" = true ]; then
     echo -e "\n${BLUE}Building ChromaLeon .zip package...${NC}"
-
-    cp -r ./locale/zh_Hans ./locale/zh_CN
-    cp -r ./po/zh_Hans.po ./po/zh_CN.po
 
     gnome-extensions pack ./ \
       --extra-source=templates \
@@ -106,9 +118,6 @@ if [ "$OPT_ZIP" = true ]; then
       -f
 
     sleep 1
-
-    rm -rf ./locale/zh_CN
-    rm -rf ./po/zh_CN.po
 fi
 
 if [ "$OPT_CHECK" = true ]; then
