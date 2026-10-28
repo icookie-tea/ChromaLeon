@@ -8,3 +8,6 @@ templates/apply_tint.py
 
 # Agent scratch / memory directory
 .workbuddy/
+
+# Python venv created by manage.sh -check
+venv/

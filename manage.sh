@@ -123,6 +123,21 @@ fi
 if [ "$OPT_CHECK" = true ]; then
     echo -e "\n${BLUE}Validating ChromaLeon .zip package...${NC}"
 
+    # gnome-extensions pack names the archive "<uuid>.zip" with the uuid read
+    # from metadata.json, so derive it instead of hardcoding an id: a rebrand
+    # silently left this phase pointing at a zip that no longer exists.
+    UUID=$(sed -n 's/.*"uuid"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' metadata.json | head -n1)
+
+    if [ -z "$UUID" ]; then
+        echo -e "${RED}Could not read the uuid from metadata.json.${NC}"
+        exit 1
+    fi
+
+    if [ ! -f "$UUID.zip" ]; then
+        echo -e "${RED}$UUID.zip not found. Build it first with -zip.${NC}"
+        exit 1
+    fi
+
     if [ ! -d "venv" ]; then
         echo "Creating Python virtual environment..."
         python -m venv venv
@@ -131,7 +146,7 @@ if [ "$OPT_CHECK" = true ]; then
     source venv/bin/activate
     pip install -q -U shexli
 
-    PYTHONFAULTHANDLER=1 shexli user-accent-colors@fabito02.shell-extension.zip
+    PYTHONFAULTHANDLER=1 shexli "$UUID.zip"
     deactivate
 fi
 
